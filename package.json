@@ -6,6 +6,8 @@
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
     "build-browser": "vue-cli-service build && cd ./cordova && cordova run browser",
+    "build-android": "vue-cli-service build && cd ./cordova && cordova run android --emulator",
+    "build-ios": "vue-cli-service build && cd ./cordova && cordova run ios --emulator",
     "lint": "vue-cli-service lint"
   },
   "dependencies": {
