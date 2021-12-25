@@ -1,12 +1,23 @@
 <template>
   <div id="app">
-    <div id="nav">
-      <router-link to="/">Home</router-link> |
-      <router-link to="/about">About</router-link>
-    </div>
     <router-view/>
+    <van-tabbar route>
+      <van-tabbar-item replace to="/home" icon="home-o">主页</van-tabbar-item>
+      <van-tabbar-item replace to="/about" icon="friends-o">关于</van-tabbar-item>
+    </van-tabbar>
   </div>
 </template>
+
+<script>
+export default {
+  created() {
+    // 路由初始化
+    if (this.$route.path === '/') {
+      this.$router.push('/home');
+    }
+  }
+}
+</script>
 
 <style>
 #app {
@@ -15,18 +26,5 @@
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
   color: #2c3e50;
-}
-
-#nav {
-  padding: 30px;
-}
-
-#nav a {
-  font-weight: bold;
-  color: #2c3e50;
-}
-
-#nav a.router-link-exact-active {
-  color: #42b983;
 }
 </style>
