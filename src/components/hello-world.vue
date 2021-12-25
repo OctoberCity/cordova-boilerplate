@@ -1,5 +1,7 @@
 <template>
-  <div class="hello">
+  <div>
+    <img class="logo-img" alt="Vue logo" src="../assets/logo-vue.png">
+    <img class="logo-img" alt="Cordova logo" src="../assets/logo-cordova.png">
     <h1>{{ msg }}</h1>
     <h3>Vue info</h3>
     <ul>
@@ -14,13 +16,29 @@
 </template>
 
 <script>
+import vue from 'vue'
+
 export default {
   name: 'HelloWorld',
   props: {
     msg: String,
-    vueVersion: String,
-    cordovaPlatform: String,
-    cordovaVersion: String,
+  },
+  data() {
+    return {
+      vueVersion: vue.version,
+      cordovaPlatform: '',
+      cordovaVersion: '',
+    }
+  },
+  created() {
+    document.addEventListener('deviceready', this.onDeviceReady, false);
+  },
+  methods: {
+    onDeviceReady() {
+      const cordova = window.cordova;
+      this.cordovaPlatform = cordova.platformId;
+      this.cordovaVersion = cordova.version
+    }
   }
 }
 </script>
@@ -40,5 +58,8 @@ li {
 }
 a {
   color: #42b983;
+}
+.logo-img {
+  height: 150px;
 }
 </style>

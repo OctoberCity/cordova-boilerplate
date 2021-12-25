@@ -5,20 +5,22 @@
   "scripts": {
     "serve": "vue-cli-service serve",
     "build": "vue-cli-service build",
-    "build-browser": "vue-cli-service build && cd ./cordova && cordova run browser",
+    "lint": "vue-cli-service lint",
     "build-android": "vue-cli-service build && cd ./cordova && cordova run android --emulator",
     "build-android-device": "vue-cli-service build && cd ./cordova && cordova run android",
+    "build-browser": "vue-cli-service build && cd ./cordova && cordova run browser",
     "build-ios": "vue-cli-service build && cd ./cordova && cordova run ios --emulator",
-    "build-ios-device": "vue-cli-service build && cd ./cordova && cordova run ios --device",
-    "lint": "vue-cli-service lint"
+    "build-ios-device": "vue-cli-service build && cd ./cordova && cordova run ios --device"
   },
   "dependencies": {
     "core-js": "^3.6.5",
-    "vue": "^2.6.11"
+    "vue": "^2.6.11",
+    "vue-router": "^3.2.0"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",
     "@vue/cli-plugin-eslint": "~4.5.0",
+    "@vue/cli-plugin-router": "^4.5.15",
     "@vue/cli-service": "~4.5.0",
     "babel-eslint": "^10.1.0",
     "eslint": "^6.7.2",
