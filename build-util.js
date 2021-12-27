@@ -44,7 +44,7 @@ async function selectMode() {
       devicesStr = devicesStr
         .replace('List of devices attached', '')
         .trim();
-      let devices = devicesStr.split(/\r?\n/);
+      let devices = devicesStr.split(/\r?\n/g);
       devices = devices
         .map(device => device.replace(/device$/, '').trim())
         .filter(device => !device.startsWith('emulator-'));
