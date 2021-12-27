@@ -1,30 +1,12 @@
 const { exec, execSync } = require('child_process');
 const inquirer = require('inquirer');
+const fse = require('fs-extra');
 
 const isServe = process.argv.includes('--serve');
+const buildId = Date.now();
 
 (async () => {
-  const platform = await selectPlatform();
-  let isDevice = true;
-  if(platform !== 'browser') {
-    const mode = await selectMode();
-    isDevice = mode === 'device';
-
-    if (platform === 'android') {
-      let devicesStr = execSync('adb devices').toString();
-      devicesStr = devicesStr
-        .replace('List of devices attached', '')
-        .trim();
-      let devices = devicesStr.split(/\r?\n/g);
-      devices = devices
-        .map(device => device.replace(/device$/, '').trim())
-        .filter(device => !device.startsWith('emulator-'));
-      if(!devices.length) {
-        console.error('Connected device not found.');
-        return;
-      }
-    }
-  }
+  const { platform, isDevice } = await makeChoice();
 
   if(isServe) {
     const serve = exec('npm run serve');
@@ -60,6 +42,44 @@ const isServe = process.argv.includes('--serve');
   }
 })();
 
+function writeLast(opts) {
+  fse.writeJSONSync('./.build.json', opts);
+}
+function readLast(opts) {
+  return fse.readJSONSync('./.build.json', opts);
+}
+
+async function makeChoice() {
+  const last = await useLast();
+  let platform = null;
+  let isDevice = true;
+  if(last) {
+    platform = last.platform;
+    isDevice = last.isDevice;
+  } else {
+    const lastOpts = readLast();
+    platform = await selectPlatform(lastOpts.platform);
+
+    if(platform == 'browser') {
+      writeLast({ buildId, platform, isDevice: false });
+    } else {
+      const mode = await selectMode(lastOpts.isDevice ? 'device' : 'emulator');
+      isDevice = mode === 'device';
+      writeLast({ buildId, platform, isDevice });
+
+      devices = listDevices(platform);
+      if(!devices.length) {
+        throw new Error('Connected device not found.');
+      }
+    }
+  }
+
+  return {
+    platform,
+    isDevice,
+  }
+}
+
 function buildApp(opts) {
   const { platform, isServe, lanHost, isDevice } = opts;
 
@@ -80,7 +100,27 @@ function buildApp(opts) {
   build.stdout.pipe(process.stdout);
 }
 
-async function selectPlatform() {
+async function useLast() {
+  const { platform, isDevice } = readLast();
+
+  const { last } = await inquirer
+    .prompt([{
+      message: 'Use last build potions?',
+      type: 'list',
+      name: 'last',
+      choices: [{
+        name: `last build on [${platform} ${isDevice ? 'device': 'emulator'}]`,
+        value: true,
+      }, {
+        name: `select again`,
+        value: false,
+      }],
+      default: 'device' 
+    }]);
+  return last && { platform, isDevice };
+}
+
+async function selectPlatform(last) {
   const platforms = [
     'android',
     'ios',
@@ -90,27 +130,54 @@ async function selectPlatform() {
   }
 
   const { platform } = await inquirer
-    .prompt([{ 
+    .prompt([{
       message: 'Which platform?',
-      type: 'list', 
-      name: 'platform', 
+      type: 'list',
+      name: 'platform',
       choices: platforms,
-      default: 'android' 
+      default: last || 'android', 
     }]);
   return platform;
 }
 
-async function selectMode() {
+async function selectMode(last) {
   const { mode } = await inquirer
-    .prompt([{ 
+    .prompt([{
       message: 'Run on device or emulator?',
-      type: 'list', 
-      name: 'mode', 
+      type: 'list',
+      name: 'mode',
       choices: [
         'device',
         'emulator',
       ],
-      default: 'device' 
+      default: last || 'device',
     }]);
   return mode;
+}
+
+function listDevices(platform) {
+  let devices = [];
+  if (platform === 'android') {
+    let devicesStr = execSync('adb devices').toString();
+    devicesStr = devicesStr
+      .replace('List of devices attached', '')
+      .trim();
+    devices = devicesStr.split(/\r?\n/g);
+    devices = devices
+      .map(device => device.replace(/device$/, '').trim())
+      .filter(device => !device.startsWith('emulator-'));
+  }
+  if (platform === 'ios') {
+    let devicesStr = execSync('xcrun xctrace list devices').toString();
+    devicesStr = devicesStr
+      .replace(/^== Devices ==/, '')
+      .replace(/== Simulators ==[\w\W]*$/, '')
+      .trim();
+    devices = devicesStr.split(/\r?\n/g);
+    const iosReg = /^[\w\W]* \([0-9.]+\) \(([0-9a-f]+)\)$/;
+    devices = devices
+      .filter(device => iosReg.test(device))
+      .map(device => device.match(iosReg)[1]);
+  }
+  return devices;
 }
