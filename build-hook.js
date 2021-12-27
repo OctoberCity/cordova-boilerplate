@@ -3,9 +3,11 @@ const path = require('path')
 const { info } = require('@vue/cli-shared-utils')
 
 let url = 'index.html';
+let mode = 'BUILD';
 process.argv.forEach(arg => {
   if(arg.startsWith('--SERVE_ADDR=')) {
     url = arg.replace('--SERVE_ADDR=', '');
+    mode = 'SERVE';
   }
 });
 
