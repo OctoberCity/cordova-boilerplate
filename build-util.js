@@ -1,6 +1,6 @@
 const { exec, execSync } = require('child_process');
 const inquirer = require('inquirer');
-const fse = require('fs-extra');
+const fs = require('fs-extra');
 
 const isServe = process.argv.includes('--serve');
 const buildId = Date.now();
@@ -43,10 +43,14 @@ const buildId = Date.now();
 })();
 
 function writeLast(opts) {
-  fse.writeJSONSync('./.build.json', opts);
+  fs.writeJSONSync('./.build.json', opts);
 }
-function readLast(opts) {
-  return fse.readJSONSync('./.build.json', opts);
+function readLast() {
+  if(fs.existsSync('./.build.json')) {
+    return fs.readJSONSync('./.build.json');
+  } else {
+    return {};
+  }
 }
 
 async function makeChoice() {
@@ -56,6 +60,7 @@ async function makeChoice() {
   if(last) {
     platform = last.platform;
     isDevice = last.isDevice;
+    writeLast({ buildId, platform, isDevice });
   } else {
     const lastOpts = readLast();
     platform = await selectPlatform(lastOpts.platform);
@@ -92,7 +97,7 @@ function buildApp(opts) {
     cwd: './cordova',
   }, (error, stdout, stderr) => {
     if(error) {
-      console.error(stderr);
+      console.error(error, stderr);
     } else {
       console.log(stdout);
     }
@@ -101,15 +106,23 @@ function buildApp(opts) {
 }
 
 async function useLast() {
-  const { platform, isDevice } = readLast();
+  const { buildId, platform, isDevice } = readLast();
+  if(!buildId) {
+    return false;
+  }
 
+  let lastStr = 'browser';
+  if(platform !== 'browser') {
+    lastStr = `${platform} ${isDevice ? 'device': 'emulator'}`
+  }
+  
   const { last } = await inquirer
     .prompt([{
       message: 'Use last build potions?',
       type: 'list',
       name: 'last',
       choices: [{
-        name: `last build on [${platform} ${isDevice ? 'device': 'emulator'}]`,
+        name: `last build on [${lastStr}]`,
         value: true,
       }, {
         name: `select again`,
