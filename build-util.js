@@ -79,9 +79,11 @@ async function makeChoice() {
       isDevice = mode === 'device';
       writeLast({ buildId, platform, isDevice });
 
-      devices = listDevices(platform);
-      if(!devices.length) {
-        throw new Error('Connected device not found.');
+      if(isDevice) {
+        devices = listDevices(platform);
+        if(!devices.length) {
+          throw new Error('Connected device not found.');
+        }
       }
     }
   }
