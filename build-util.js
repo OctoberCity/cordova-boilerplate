@@ -3,7 +3,6 @@ const inquirer = require('inquirer');
 const fs = require('fs-extra');
 
 const isServe = process.argv.includes('--serve');
-const buildId = Date.now();
 
 (async () => {
   const { platform, isDevice } = await makeChoice();
@@ -18,10 +17,14 @@ const buildId = Date.now();
 
     const serve = exec('npm run serve');
     serve.stdout.pipe(process.stdout);
+    let firstTime = true;
     serve.stdout.on('data', data => {
+      if(!firstTime) { return }
+
       const dataStr = data.toString().trim();
       const reg = /\-\sLocal:[\s]+(http:\/\/localhost:[\d]+)[\s]+\-\sNetwork:[\s]+(http:\/\/[\d.:]+)/;
-      if(reg.test(dataStr)) {
+      if(reg.test(dataStr) ) {
+        firstTime = false;
         const mathes = dataStr.match(reg);
         const localHost = mathes[1];
         const lanHost = mathes[2];
@@ -67,17 +70,17 @@ async function makeChoice() {
   if(last) {
     platform = last.platform;
     isDevice = last.isDevice;
-    writeLast({ buildId, platform, isDevice });
+    writeLast({ platform, isDevice });
   } else {
     const lastOpts = readLast();
     platform = await selectPlatform(lastOpts.platform);
 
     if(platform == 'browser') {
-      writeLast({ buildId, platform, isDevice: false });
+      writeLast({ platform, isDevice: false });
     } else {
       const mode = await selectMode(lastOpts.isDevice ? 'device' : 'emulator');
       isDevice = mode === 'device';
-      writeLast({ buildId, platform, isDevice });
+      writeLast({ platform, isDevice });
 
       if(isDevice) {
         devices = listDevices(platform);
@@ -115,8 +118,8 @@ function buildApp(opts) {
 }
 
 async function useLast() {
-  const { buildId, platform, isDevice } = readLast();
-  if(!buildId) {
+  const { platform, isDevice } = readLast();
+  if(!platform) {
     return false;
   }
 

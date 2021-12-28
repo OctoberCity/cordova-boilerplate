@@ -2,20 +2,6 @@ const fs = require('fs-extra');
 const path = require('path')
 const { info } = require('@vue/cli-shared-utils')
 
-function writeLast(opts) {
-  fs.writeJSONSync(path.resolve(__dirname, './.build.json'), opts);
-}
-function readLast() {
-  return fs.readJSONSync(path.resolve(__dirname, './.build.json'));
-}
-const last = readLast();
-if(last.buildId === last.hookId) {
-  throw new Error('skip rebuild');
-} else {
-  last.hookId = last.buildId;
-  writeLast(last);
-}
-
 let url = 'index.html';
 let mode = 'BUILD';
 process.argv.forEach(arg => {
