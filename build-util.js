@@ -9,6 +9,13 @@ const buildId = Date.now();
   const { platform, isDevice } = await makeChoice();
 
   if(isServe) {
+    // serve 模式下同步
+    // cordova.js/cordova_plugins.js 文件
+    const srcDir = `./cordova/platforms/${platform}/platform_www/`;
+    const dstDir = './public/';
+    fs.copySync(srcDir + 'cordova.js', dstDir + 'cordova.js');
+    fs.copySync(srcDir + 'cordova_plugins.js', dstDir + 'cordova_plugins.js');
+
     const serve = exec('npm run serve');
     serve.stdout.pipe(process.stdout);
     serve.stdout.on('data', data => {
