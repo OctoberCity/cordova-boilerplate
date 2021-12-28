@@ -11,11 +11,11 @@ const isServe = process.argv.includes('--serve');
     // serve 模式下同步
     // cordova.js/cordova_plugins.js 文件
     const srcDir = `./cordova/platforms/${platform}/platform_www/`;
-    const dstDir = './public/';
+    const dstDir = `./public/${platform}/`;
     fs.copySync(srcDir + 'cordova.js', dstDir + 'cordova.js');
     fs.copySync(srcDir + 'cordova_plugins.js', dstDir + 'cordova_plugins.js');
 
-    const serve = exec('npm run serve');
+    const serve = exec(`npm run serve -- --mode=${platform}`);
     serve.stdout.pipe(process.stdout);
     let firstTime = true;
     serve.stdout.on('data', data => {
