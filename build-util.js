@@ -97,7 +97,24 @@ async function makeChoice() {
   }
 }
 
+function cleanUp() {
+  // cordova clean 的 bug，ios 下的 build 需要自己删除
+  execSync('rm -rf build/', {
+    cwd: './cordova/platforms/ios',
+    stdio: 'inherit',
+  });
+
+  execSync('cordova clean', {
+    cwd: './cordova',
+    stdio: 'inherit',
+  });
+
+  console.log('\ncordova cleaned up!\n');
+}
+
 function buildApp(opts) {
+  cleanUp();
+
   const { platform, isServe, lanHost, isDevice } = opts;
 
   let cmd = `cordova run ${platform}`;
