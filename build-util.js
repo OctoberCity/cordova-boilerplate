@@ -8,12 +8,8 @@ const isServe = process.argv.includes('--serve');
   const { platform, isDevice } = await makeChoice();
 
   if(isServe) {
-    // serve 模式下同步
-    // cordova.js/cordova_plugins.js 文件
-    const srcDir = `./cordova/platforms/${platform}/platform_www/`;
-    const dstDir = `./public/dev-build/${platform}/`;
-    fs.copySync(srcDir + 'cordova.js', dstDir + 'cordova.js');
-    fs.copySync(srcDir + 'cordova_plugins.js', dstDir + 'cordova_plugins.js');
+    copyPlatformsCordovaJs(platform);
+    copyPlatformsHtml(platform);
 
     const serve = exec(`npm run serve -- --mode=${platform}`);
     serve.stdout.pipe(process.stdout);
@@ -110,6 +106,40 @@ function cleanUp() {
   });
 
   console.log('\ncordova cleaned up!\n');
+}
+
+// serve 模式下同步
+// cordova.js/cordova_plugins.js 文件
+function copyPlatformsCordovaJs(platform) {
+  const srcDir = `./cordova/platforms/${platform}/platform_www/`;
+  const dstDir = `./public/dev-build/${platform}/`;
+  fs.copySync(srcDir + 'cordova.js', dstDir + 'cordova.js');
+  fs.copySync(srcDir + 'cordova_plugins.js', dstDir + 'cordova_plugins.js');
+}
+
+function copyPlatformsHtml(platform) {
+  const srcFile = `./public/index.html`;
+  const dstFile = `./public/dev-build/index-${platform}.html`;
+  const lines = fs.readFileSync(srcFile, 'utf-8').split(/\r?\n/g);
+  
+  const regexImportComment = /\s+<!-- 引入 cordova.js -->/
+  const importCommentIndex = lines.findIndex(line => line.match(regexImportComment));
+  if (importCommentIndex >= 0) {
+    lines[importCommentIndex + 1] = `    <script src="dev-build/${platform}/cordova.js"></script>`;
+  }
+
+  if(platform === 'browser') {
+    const regexDisableComment = /\s+<!-- 调试模式下 platform===browser 时禁用网页端 CSP -->/
+    const disableCommentIndex = lines.findIndex(line => line.match(regexDisableComment));
+    if (disableCommentIndex >= 0 && platform === 'browser') {
+      const cspLine = lines[disableCommentIndex + 1];
+      lines[disableCommentIndex + 1] = cspLine
+        .replace('<meta', '<!-- <meta')
+        .replace(/>$/, '> -->');
+    }
+  }
+
+  fs.writeFileSync(dstFile, lines.join('\n'))
 }
 
 function buildApp(opts) {
