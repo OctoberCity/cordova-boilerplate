@@ -23,8 +23,6 @@ pnpm-debug.log*
 *.sw?
 cordova/www
 .build.json
-public/cordova.js
-public/cordova_plugins.js
-public/ios
-public/android
-public/browser
+public/dev-build/ios
+public/dev-build/android
+public/dev-build/browser

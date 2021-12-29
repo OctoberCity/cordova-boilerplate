@@ -6,7 +6,7 @@ module.exports = {
   pages: {
     index: {
       entry: 'src/main.js',
-      template: `public/index-${platform}.html`,
+      template: `public/dev-build/index-${platform}.html`,
     }
   }
 }
