@@ -6,7 +6,8 @@
     "dev": "node build-util.js --serve",
     "build": "node build-util.js",
     "serve": "vue-cli-service serve",
-    "lint": "vue-cli-service lint"
+    "lint": "vue-cli-service lint",
+    "devand": "node build-util.js --serve --androidDevice"
   },
   "dependencies": {
     "core-js": "^3.6.5",
