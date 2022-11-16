@@ -2,12 +2,12 @@
 
 ## Project setup
 ```
-npm install
+npm install && cd cordova && mkdir www && cordova platform add (android/ios/etc)
 ```
 
-### Compiles and hot-reloads for development
+### Compiles and hot-reloads for development android
 ```
-npm run serve
+npm run devand
 ```
 
 ### Compiles and minifies for production
