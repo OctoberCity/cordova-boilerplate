@@ -12,7 +12,9 @@ npm run devand
 
 ### Compiles and minifies for production
 ```
-npm run build
+npm run build  (因为dev模式中，cordova/config.xml 中src 会被修改，需要build两次)  
+
+ apk 生成路径${projectPath}\cordova\platforms\android\app\build\outputs\apk\debug\app-debug.apk
 ```
 
 ### Lints and fixes files
