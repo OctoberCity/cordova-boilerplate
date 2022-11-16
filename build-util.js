@@ -1,3 +1,4 @@
+/* eslint-disable */
 const { exec, execSync } = require('child_process');
 const inquirer = require('inquirer');
 const fs = require('fs-extra');
@@ -11,12 +12,13 @@ const isServe = process.argv.includes('--serve');
     copyPlatformsCordovaJs(platform);
     copyPlatformsHtml(platform);
 
+    execSync(`npm run dev-build -- --mode=${platform}`);
     const serve = exec(`npm run serve -- --mode=${platform}`);
     serve.stdout.pipe(process.stdout);
     let firstTime = true;
     serve.stdout.on('data', data => {
       if(!firstTime) { return }
-
+      
       const dataStr = data.toString().trim();
       const reg = /\-\sLocal:[\s]+(http:\/\/localhost:[\d]+)[\s]+\-\sNetwork:[\s]+(http:\/\/[\d.:]+)/;
       if(reg.test(dataStr) ) {
@@ -108,13 +110,11 @@ function cleanUp() {
   console.log('\ncordova cleaned up!\n');
 }
 
-// serve 模式下同步
-// cordova.js/cordova_plugins.js 文件
+// serve 模式下同步 platform_www 下的文件到 public
 function copyPlatformsCordovaJs(platform) {
   const srcDir = `./cordova/platforms/${platform}/platform_www/`;
   const dstDir = `./public/dev-build/${platform}/`;
-  fs.copySync(srcDir + 'cordova.js', dstDir + 'cordova.js');
-  fs.copySync(srcDir + 'cordova_plugins.js', dstDir + 'cordova_plugins.js');
+  fs.copySync(srcDir, dstDir);
 }
 
 function copyPlatformsHtml(platform) {
@@ -174,7 +174,7 @@ async function useLast() {
   if(platform !== 'browser') {
     lastStr = `${platform} ${isDevice ? 'device': 'emulator'}`
   }
-  
+
   const { last } = await inquirer
     .prompt([{
       message: 'Use last build potions?',
@@ -230,7 +230,7 @@ async function selectMode(last) {
 function listDevices(platform) {
   let devices = [];
   if (platform === 'android') {
-    let devicesStr = execSync('adb devices').toString();
+    let devicesStr = execSync('D:/android/SDK/platform-tools/adb.exe devices').toString();
     devicesStr = devicesStr
       .replace('List of devices attached', '')
       .trim();

@@ -8,5 +8,6 @@ module.exports = {
       entry: 'src/main.js',
       template: `public/dev-build/index-${platform}.html`,
     }
-  }
+  },
+  lintOnSave:false //关闭eslint检查
 }
